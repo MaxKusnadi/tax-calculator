@@ -11,5 +11,7 @@ external_stylesheets = ['https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/boo
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
+server = app.server
+
 from app.main_templates import *
 from app.template_controller import *
