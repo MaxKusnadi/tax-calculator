@@ -1,6 +1,7 @@
 import logging
 
 from app.constants import TAX_TIERS
+from app.utils import Utils
 
 
 class TaxInformation:
@@ -13,7 +14,8 @@ class TaxInformation:
 
 class TaxCalculator:
     
-    def calculate_tax(self, annual_income, bonus=0, rebates=0, donation=0):
+    def calculate_tax(self, monthly_income, bonus=0, rebates=0, donation=0):
+        annual_income = Utils.get_annual_income(monthly_income)
         logging.debug("Calculating tax... | Annual: {} | Bonus: {} | Rebates: {} | Donation: {}".format(annual_income,
                                                                                                         bonus,
                                                                                                         rebates,
@@ -24,7 +26,7 @@ class TaxCalculator:
             logging.error(e)
             raise e
         
-        taxable_income = annual_income + bonus - rebates - (2.5 * donation)
+        taxable_income = Utils.get_taxable_income(annual_income, bonus, rebates, donation)
         total_tax = 0
         tier_level = '0'
         tier_info = TAX_TIERS['0']
@@ -35,7 +37,7 @@ class TaxCalculator:
             tax_tier_information = tax_tier[0]
             tier_level = tax_tier_information[0]
             tier_info = tax_tier_information[1]
-            total_tax = self._get_total_tax(annual_income, tier_info)
+            total_tax = self._get_total_tax(taxable_income, tier_info)
         logging.debug("Tier: {} | Total tax: {} | Tax Info: {}".format(tier_level, total_tax, tier_info))
         result = TaxInformation(tier_level, tier_info, total_tax)
         return result
