@@ -30,13 +30,12 @@ def get_annual_salary(n_submit, n_blur, value):
     [Input('monthly-salary', 'n_submit'), Input('monthly-salary', 'n_blur'),
      Input('annual-bonus', 'n_submit'), Input('annual-bonus', 'n_blur'),
      Input('tax-rebates', 'n_submit'), Input('tax-rebates', 'n_blur'),
-     Input('donation', 'n_submit'), Input('donation', 'n_blur')],
+     Input('donation', 'value')],
     [State('monthly-salary', 'value'),
      State('annual-bonus', 'value'),
-     State('tax-rebates', 'value'),
-     State('donation', 'value'), ]
+     State('tax-rebates', 'value')]
 )
-def get_taxable_salary(ns1, nb1, ns2, nb2, ns3, nb3, ns4, nb4, monthly_salary, annual_bonus, tax_rebates, donation):
+def get_taxable_salary(ns1, nb1, ns2, nb2, ns3, nb3, donation, monthly_salary, annual_bonus, tax_rebates):
     annual_salary = Utils.get_annual_income(monthly_salary)
     taxable_salary = Utils.get_taxable_income(annual_salary, annual_bonus, tax_rebates, donation)
     return html.Div(className="row mt-1",
@@ -49,17 +48,60 @@ def get_taxable_salary(ns1, nb1, ns2, nb2, ns3, nb3, ns4, nb4, monthly_salary, a
 
 
 @app.callback(
+    Output('donation', 'max'),
+    [Input('monthly-salary', 'n_submit'), Input('monthly-salary', 'n_blur'),
+     Input('annual-bonus', 'n_submit'), Input('annual-bonus', 'n_blur')],
+    [State('monthly-salary', 'value'),
+     State('annual-bonus', 'value')]
+)
+def get_maximum_donation(ns1, nb1, ns2, nb2, monthly_salary, annual_bonus):
+    annual_salary = Utils.get_annual_income(monthly_salary)
+    return annual_salary + annual_bonus
+
+
+@app.callback(
+    Output('donation', 'marks'),
+    [Input('monthly-salary', 'n_submit'), Input('monthly-salary', 'n_blur'),
+     Input('annual-bonus', 'n_submit'), Input('annual-bonus', 'n_blur')],
+    [State('monthly-salary', 'value'),
+     State('annual-bonus', 'value')]
+)
+def get_maximum_donation_mark(ns1, nb1, ns2, nb2, monthly_salary, annual_bonus):
+    annual_salary = Utils.get_annual_income(monthly_salary)
+    max_donation = annual_salary + annual_bonus
+    return {
+        0: 'S$ 0',
+        max_donation: "{0:.2f}".format(max_donation)
+    }
+
+
+@app.callback(
+    Output('current-donation', 'value'),
+    [Input('donation', 'value')]
+)
+def get_maximum_donation_label(donation):
+    return donation
+
+@app.callback(
+    Output('donation', 'value'),
+    [Input('current-donation', 'n_submit'), Input('current-donation', 'n_blur')],
+    [State('current-donation', 'value')]
+)
+def get_maximum_donation_label(ns, nb, donation):
+    return donation
+
+
+@app.callback(
     Output('tax-info', 'children'),
     [Input('monthly-salary', 'n_submit'), Input('monthly-salary', 'n_blur'),
      Input('annual-bonus', 'n_submit'), Input('annual-bonus', 'n_blur'),
      Input('tax-rebates', 'n_submit'), Input('tax-rebates', 'n_blur'),
-     Input('donation', 'n_submit'), Input('donation', 'n_blur')],
+     Input('donation', 'value')],
     [State('monthly-salary', 'value'),
      State('annual-bonus', 'value'),
-     State('tax-rebates', 'value'),
-     State('donation', 'value'), ]
+     State('tax-rebates', 'value')]
 )
-def get_taxable_salary(ns1, nb1, ns2, nb2, ns3, nb3, ns4, nb4, monthly_salary, annual_bonus, tax_rebates, donation):
+def get_taxable_salary(ns1, nb1, ns2, nb2, ns3, nb3, donation, monthly_salary, annual_bonus, tax_rebates):
     tax_info = tax_calculator.calculate_tax(monthly_salary, annual_bonus, tax_rebates, donation)
     print(tax_info)
     return [
@@ -75,7 +117,7 @@ def get_taxable_salary(ns1, nb1, ns2, nb2, ns3, nb3, ns4, nb4, monthly_salary, a
                      html.Div(className="col-sm-3 mr-1",
                               children=["Total Monthly Tax: "]),
                      html.Div(className="col-sm-3",
-                              children=["S$ {0:.2f}".format(tax_info.total_tax/12)])
+                              children=["S$ {0:.2f}".format(tax_info.total_tax / 12)])
                  ]),
         html.Div(className="row mt-1",
                  children=[

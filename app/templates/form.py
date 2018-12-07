@@ -40,16 +40,26 @@ rebates = html.Div(className="row mt-1",
 
                    ])
 
-donation = html.Div(className="row mt-1",
+donation = html.Div(className="mt-1",
                     children=[
-                        html.Div(className="col-sm-4 mr-1",
-                                 children=["Donation (S$)"]),
-                        dcc.Input(id="donation",
-                                  className="col-sm-2",
-                                  type="number",
-                                  value=0,
-                                  min=0,
-                                  pattern="[0-9]+")
+                        html.Div(className="row",
+                                 children=[
+                                     html.Div(className="col-sm-4 mr-1",
+                                              children=["Donation: "]),
+                                     dcc.Input(className="col-sm-2",
+                                               type='number',
+                                               min=0,
+                                               value=0,
+                                               id="current-donation"),
+                                 ]),
+                        html.Div(className="col-sm-6 ml-1 mt-2",
+                                 children=[dcc.Slider(
+                                     id='donation',
+                                     min=0,
+                                     step=10,
+                                     value=0,
+                                     updatemode='drag'
+                                 )])
 
                     ])
 
